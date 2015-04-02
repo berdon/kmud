@@ -52,4 +52,52 @@ func (self *DbObject) IsDestroyed() bool {
 	return self.destroyed
 }
 
+func (self *DbObject) readLocker_str(fn func() string) string {
+    self.ReadLock()
+    defer self.ReadUnlock()
+
+    return fn()
+}
+
+func (self *DbObject) readLocker_id(fn func() bson.ObjectId) bson.ObjectId {
+    self.ReadLock()
+    defer self.ReadUnlock()
+
+    return fn()
+}
+
+func (self *DbObject) readLocker_int(fn func() int) int {
+    self.ReadLock()
+    defer self.ReadUnlock()
+
+    return fn()
+}
+
+func (self *DbObject) writeLocker_str(fn func(string), newVal string, oldVal string) {
+    self.WriteLock()
+    defer self.WriteUnlock()
+
+    if newVal != oldVal {
+        fn(newVal)
+    }
+}
+
+func (self *DbObject) writeLocker_id(fn func(bson.ObjectId), newVal bson.ObjectId, oldVal bson.ObjectId) {
+    self.WriteLock()
+    defer self.WriteUnlock()
+
+    if newVal != oldVal {
+        fn(newVal)
+    }
+}
+
+func (self *DbObject) writeLocker_int(fn func(int), newVal int, oldVal int) {
+    self.WriteLock()
+    defer self.WriteUnlock()
+
+    if newVal != oldVal {
+        fn(newVal)
+    }
+}
+
 // vim: nocindent

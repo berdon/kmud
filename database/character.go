@@ -45,19 +45,16 @@ func (self *Character) GetType() objectType {
 }
 
 func (self *Character) GetName() string {
-	self.ReadLock()
-	defer self.ReadUnlock()
-
-	return self.Name
+    return self.readLocker_str(func() string {
+        return self.Name
+    })
 }
 
 func (self *Character) SetName(name string) {
-	if name != self.GetName() {
-		self.WriteLock()
+    self.writeLocker_str(func(string) {
 		self.Name = utils.FormatName(name)
-		self.WriteUnlock()
 		modified(self)
-	}
+    }, name, self.Name)
 }
 
 func NewNpc(name string, roomId bson.ObjectId) *Character {
@@ -104,47 +101,36 @@ func (self *Character) IsPlayer() bool {
 }
 
 func (self *Character) SetRoomId(id bson.ObjectId) {
-	self.WriteLock()
-	defer self.WriteUnlock()
-
-	if id != self.RoomId {
-		self.RoomId = id
+    self.writeLocker_id(func(id bson.ObjectId) {
+        self.RoomId = id
 		modified(self)
-	}
+    }, id, self.RoomId)
 }
 
 func (self *Character) GetRoomId() bson.ObjectId {
-	self.ReadLock()
-	defer self.ReadUnlock()
-
-	return self.RoomId
+    return self.readLocker_id(func() bson.ObjectId {
+        return self.RoomId
+    })
 }
 
 func (self *Character) SetUserId(id bson.ObjectId) {
-	self.WriteLock()
-	defer self.WriteUnlock()
-
-	if id != self.UserId {
+    self.writeLocker_id(func(id bson.ObjectId) {
 		self.UserId = id
 		modified(self)
-	}
+    }, id, self.UserId)
 }
 
 func (self *Character) GetUserId() bson.ObjectId {
-	self.ReadLock()
-	defer self.ReadUnlock()
-
-	return self.UserId
+    return self.readLocker_id(func() bson.ObjectId {
+        return self.UserId
+    })
 }
 
 func (self *Character) SetCash(cash int) {
-	self.WriteLock()
-	defer self.WriteUnlock()
-
-	if cash != self.Cash {
+    self.writeLocker_int(func(cash int) {
 		self.Cash = cash
 		modified(self)
-	}
+    }, cash, self.Cash)
 }
 
 func (self *Character) AddCash(amount int) {
@@ -152,10 +138,9 @@ func (self *Character) AddCash(amount int) {
 }
 
 func (self *Character) GetCash() int {
-	self.ReadLock()
-	defer self.ReadUnlock()
-
-	return self.Cash
+    return self.readLocker_int(func() int {
+        return self.Cash
+    })
 }
 
 func (self *Character) AddItem(item *Item) {
@@ -205,19 +190,16 @@ func (self *Character) GetItemIds() []bson.ObjectId {
 }
 
 func (self *Character) SetConversation(conversation string) {
-	self.WriteLock()
-	defer self.WriteUnlock()
-
-	if self.Conversation != conversation {
+    self.writeLocker_str(func(conversation string) {
 		self.Conversation = conversation
 		modified(self)
-	}
+    }, conversation, self.Conversation)
 }
 
 func (self *Character) GetConversation() string {
-	self.ReadLock()
-	defer self.ReadUnlock()
-	return self.Conversation
+    return self.readLocker_str(func() string {
+        return self.Conversation
+    })
 }
 
 func (self *Character) PrettyConversation() string {
@@ -233,6 +215,9 @@ func (self *Character) PrettyConversation() string {
 }
 
 func (self *Character) SetHealth(health int) {
+    self.writeLocker_int(func(health int) {
+    }, health, self.Health)
+
 	self.WriteLock()
 	defer self.WriteUnlock()
 

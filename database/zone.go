@@ -25,20 +25,16 @@ func (self *Zone) GetType() objectType {
 }
 
 func (self *Zone) GetName() string {
-	self.ReadLock()
-	defer self.ReadUnlock()
-
-	return self.Name
+    return self.readLocker_str(func() string {
+        return self.Name
+    })
 }
 
 func (self *Zone) SetName(name string) {
-	self.WriteLock()
-	defer self.WriteUnlock()
-
-	if name != self.Name {
-		self.Name = utils.FormatName(name)
-		modified(self)
-	}
+    self.writeLocker_str(func(name string) {
+        self.Name = utils.FormatName(name)
+        modified(self)
+    }, name, self.Name)
 }
 
 type Zones []*Zone
