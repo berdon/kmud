@@ -83,8 +83,35 @@ func GetRawUserInputSuffixP(conn io.ReadWriter, prompter Prompter, suffix string
 	}
 }
 
+func GetRawUserInputSuffixPE(conn io.ReadWriter, prompter Prompter, suffix string, cm ColorMode) string {
+	scanner := bufio.NewScanner(conn)
+
+	for {
+		Write(conn, prompter.GetPrompt(), cm)
+
+		if !scanner.Scan() {
+			panic("EOF")
+		}
+
+		PanicIfError(scanner.Err())
+
+		input := scanner.Text()
+		Write(conn, suffix, cm)
+
+		if input == "x" || input == "X" {
+			return ""
+		}
+
+		return input
+	}
+}
+
 func GetRawUserInputP(conn io.ReadWriter, prompter Prompter, cm ColorMode) string {
 	return GetRawUserInputSuffixP(conn, prompter, "", cm)
+}
+
+func GetRawUserInputPE(conn io.ReadWriter, prompter Prompter, cm ColorMode) string {
+	return GetRawUserInputSuffixPE(conn, prompter, "", cm)
 }
 
 func GetRawUserInput(conn io.ReadWriter, prompt string, cm ColorMode) string {
@@ -96,8 +123,18 @@ func GetUserInputP(conn io.ReadWriter, prompter Prompter, cm ColorMode) string {
 	return Simplify(input)
 }
 
+func GetUserInputPE(conn io.ReadWriter, prompter Prompter, cm ColorMode) string {
+	input := GetRawUserInputPE(conn, prompter, cm)
+	return Simplify(input)
+}
+
 func GetUserInput(conn io.ReadWriter, prompt string, cm ColorMode) string {
 	input := GetUserInputP(conn, SimplePrompter(prompt), cm)
+	return Simplify(input)
+}
+
+func GetUserInputE(conn io.ReadWriter, prompt string, cm ColorMode) string {
+	input := GetUserInputPE(conn, SimplePrompter(prompt), cm)
 	return Simplify(input)
 }
 

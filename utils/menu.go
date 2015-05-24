@@ -3,8 +3,6 @@ package utils
 import (
 	"fmt"
 	"io"
-	"labix.org/v2/mgo/bson"
-	"strconv"
 	"strings"
 )
 
@@ -24,30 +22,6 @@ func NewMenu(text string) *Menu {
 type action struct {
 	key  string
 	text string
-	data bson.ObjectId
-}
-
-func (self *Menu) AddAction(key string, text string) {
-	self.addAction(key, text, "")
-}
-
-func (self *Menu) AddActionData(key int, text string, data bson.ObjectId) {
-	keyStr := strconv.Itoa(key)
-	self.addAction(keyStr, text, data)
-}
-
-func (self *Menu) addAction(key string, text string, data bson.ObjectId) {
-	self.actions = append(self.actions, action{key: strings.ToLower(key), text: text, data: data})
-}
-
-func (self *Menu) GetData(choice string) bson.ObjectId {
-	for _, action := range self.actions {
-		if action.key == choice {
-			return action.data
-		}
-	}
-
-	return ""
 }
 
 func (self *Menu) GetPrompt() string {
@@ -68,22 +42,6 @@ func (self *Menu) getAction(key string) action {
 func (self *Menu) HasAction(key string) bool {
 	action := self.getAction(key)
 	return action.key != ""
-}
-
-func (self *Menu) Exec(conn io.ReadWriter, cm ColorMode) (string, bson.ObjectId) {
-	for {
-		self.Print(conn, cm)
-		input := GetUserInput(conn, Colorize(ColorWhite, self.prompt), cm)
-
-		if input == "" {
-			return "", ""
-		}
-
-		action := self.getAction(input)
-		if action.key != "" {
-			return action.key, action.data
-		}
-	}
 }
 
 func (self *Menu) Print(conn io.Writer, cm ColorMode) {
