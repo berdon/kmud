@@ -75,11 +75,7 @@ func GetRawUserInputSuffixP(conn io.ReadWriter, prompter Prompter, suffix string
 		input := scanner.Text()
 		Write(conn, suffix, cm)
 
-		if input == "x" || input == "X" {
-			return ""
-		} else if input != "" {
-			return input
-		}
+		return input
 	}
 }
 
@@ -97,10 +93,6 @@ func GetRawUserInputSuffixPE(conn io.ReadWriter, prompter Prompter, suffix strin
 
 		input := scanner.Text()
 		Write(conn, suffix, cm)
-
-		if input == "x" || input == "X" {
-			return ""
-		}
 
 		return input
 	}
@@ -393,6 +385,32 @@ func Random(low, high int) int {
 	result += low
 
 	return result
+}
+
+func ReplaceColorTokens(message string) string {
+	// Token replacing
+	message = strings.Replace(message, "$n", "\r\n", -1)
+
+	message = strings.Replace(message, "$r", string(ColorRed), -1)
+	message = strings.Replace(message, "$g", string(ColorGreen), -1)
+	message = strings.Replace(message, "$y", string(ColorYellow), -1)
+	message = strings.Replace(message, "$b", string(ColorBlue), -1)
+	message = strings.Replace(message, "$m", string(ColorMagenta), -1)
+	message = strings.Replace(message, "$c", string(ColorCyan), -1)
+	message = strings.Replace(message, "$w", string(ColorWhite), -1)
+
+	message = strings.Replace(message, "$-", string(ColorNormal), -1)
+	message = strings.Replace(message, "$gr", string(ColorGray), -1)
+
+	message = strings.Replace(message, "$dr", string(ColorDarkRed), -1)
+	message = strings.Replace(message, "$dg", string(ColorDarkGreen), -1)
+	message = strings.Replace(message, "$dy", string(ColorDarkYellow), -1)
+	message = strings.Replace(message, "$db", string(ColorDarkBlue), -1)
+	message = strings.Replace(message, "$dm", string(ColorDarkMagenta), -1)
+	message = strings.Replace(message, "$dc", string(ColorDarkCyan), -1)
+	message = strings.Replace(message, "$db", string(ColorBlack), -1)
+
+	return message + string(ColorNormal)
 }
 
 // vim: nocindent
